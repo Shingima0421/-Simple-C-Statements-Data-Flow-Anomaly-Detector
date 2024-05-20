@@ -11,5 +11,3 @@ bool App::OnInit() {
 	mainFrame->Show();
 	return true;
 }
-
-

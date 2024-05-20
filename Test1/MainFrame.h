@@ -5,10 +5,21 @@ class MainFrame : public wxFrame
 {
 public:
 	MainFrame(const wxString& title);
+private:
+	void CreateControls();
+	void BindEventHandlers();
 
-	//void OnInsertButtonClicked(wxCommandEvent& evt);
-	//void OnDeleteButtonClicked(wxCommandEvent& evt);
 	void OnModifyButtonClicked(wxCommandEvent& evt);
-	void OnInsertTextChanged(wxCommandEvent& evt);
-	void OnLineNumberChanged(wxCommandEvent& evt);
+
+	void AddCodeFromInput();
+
+	wxPanel* panel;
+	wxStaticText* inputTextHeader;
+	wxStaticText* inputLineHeader;
+	wxTextCtrl* inputTextField;
+	wxTextCtrl* inputLineField;
+	wxTextCtrl* outputAnomaly;
+	wxTextCtrl* outputBox;
+	wxButton* modifyButton;
+	wxButton* clearButton;
 };
