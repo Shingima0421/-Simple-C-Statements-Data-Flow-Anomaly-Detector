@@ -5,17 +5,22 @@
 #include <fstream>
 #include <algorithm>
 
-void saveCodeToFile(const std::vector<Code>& codes, const std::string& fileName)
+void saveCodeToFile(const std::vector<Code>& codes, const std::string& fileName, const std::string& fileName2)
 {
 	std::ofstream ostream(fileName);
 	ostream << codes.size();
 
+	std::ofstream ostream2(fileName2);
+	ostream2 << codes.size();
+
 	for (const Code& code : codes) {
-		std::string line = code.code_line;
+		std::string line = code.description;
 		std::replace(line.begin(), line.end(), ' ', '_');
 
-		ostream << '\n' << line;
+		ostream << '\n' << line << ' ' << code.done;
 	}
+
+
 }
 
 std::vector<Code> loadCodeFromFile(const std::string& fileName)
@@ -31,11 +36,12 @@ std::vector<Code> loadCodeFromFile(const std::string& fileName)
 	istream >> n;
 
 	for (int i = 0; i < n; i++) {
-		std::string code_line;
+		std::string description;
+		bool done;
 
-		istream >> code_line;
-		std::replace(code_line.begin(), code_line.end(), '_', ' ');
-		codes.push_back(Code{ code_line });
+		istream >> description >> done;
+		std::replace(description.begin(), description.end(), '_', ' ');
+		codes.push_back(Code{ description, done });
 	}
 
 	return codes;

@@ -8,18 +8,24 @@ public:
 private:
 	void CreateControls();
 	void BindEventHandlers();
+	void AddSavedTasks();
 
 	void OnModifyButtonClicked(wxCommandEvent& evt);
+	void OnInputEnter(wxCommandEvent& evt);
+	void OnListKeyDown(wxKeyEvent& evt);
+	void OnClearButtonClicked(wxCommandEvent& evt);
+	void OnWindowClosed(wxCloseEvent& evt);
 
+	void DeleteSelectedTask();
 	void AddCodeFromInput();
+	void MoveSelectedCode(int offset);
+	void SwapCode(int i, int j);
 
 	wxPanel* panel;
 	wxStaticText* inputTextHeader;
-	wxStaticText* inputLineHeader;
 	wxTextCtrl* inputTextField;
-	wxTextCtrl* inputLineField;
 	wxTextCtrl* outputAnomaly;
-	wxTextCtrl* outputBox;
+	wxCheckListBox* outputBox;
 	wxButton* modifyButton;
 	wxButton* clearButton;
 };

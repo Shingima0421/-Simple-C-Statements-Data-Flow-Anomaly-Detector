@@ -8,6 +8,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
 {
 	CreateControls();
 	BindEventHandlers();
+	AddSavedTasks();
 }
 
 void MainFrame::CreateControls()
@@ -15,43 +16,140 @@ void MainFrame::CreateControls()
 	panel = new wxPanel(this);
 
 	inputTextHeader = new wxStaticText(panel, wxID_ANY, "Simple C Statement", wxPoint(17, 10));
-	inputLineHeader = new wxStaticText(panel, wxID_ANY, "Line Number", wxPoint(227, 10));
-
-	inputTextField = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(17, 30), wxSize(200, 20));
-	inputLineField = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(227, 30), wxSize(70, 20));
+	inputTextField = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(17, 30), wxSize(280, 20), wxTE_PROCESS_ENTER);
 	clearButton = new wxButton(panel, wxID_ANY, "Clear", wxPoint(17, 675), wxSize(86, 22));
 	modifyButton = new wxButton(panel, wxID_ANY, "Modify", wxPoint(306, 29), wxSize(86, 22));
 
 	outputAnomaly = new wxTextCtrl(panel, wxID_ANY, "No Anomalies detected.", wxPoint(17, 570), wxSize(375, 100));
-	outputBox = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(17, 60), wxSize(375, 500), wxTE_READONLY | wxTE_MULTILINE);
-
-
+	outputBox = new wxCheckListBox(panel, wxID_ANY, wxPoint(17, 60), wxSize(375, 500));
 }
 
 void MainFrame::BindEventHandlers()
 {
 	modifyButton->Bind(wxEVT_BUTTON, &MainFrame::OnModifyButtonClicked, this);
+	inputTextField->Bind(wxEVT_TEXT_ENTER, &MainFrame::OnInputEnter, this);
+	outputBox->Bind(wxEVT_KEY_DOWN, &MainFrame::OnListKeyDown, this);
+	clearButton->Bind(wxEVT_BUTTON, &MainFrame::OnClearButtonClicked, this);
+	this->Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnWindowClosed, this);
 }
 
-void MainFrame::OnModifyButtonClicked(wxCommandEvent& evt)
+void MainFrame::AddSavedTasks()
+{
+	std::vector<Code> codes = loadCodeFromFile("codes.txt");
+
+	wxMessageDialog dialog(this, "Hi?",
+		"Hi!", wxOK);
+
+	for (const Code& code : codes) {
+		int index = outputBox->GetCount();
+		outputBox->Insert(code.description, index);
+		outputBox->Check(index, 0); //all check_boxes should be empty since they will only be used to check for anomaly
+	}
+}
+
+void MainFrame::OnModifyButtonClicked(wxCommandEvent& evt) //change modify button to save button so that when pressed, 
+														   //it saves all the code to the file
 {
 	AddCodeFromInput();
+}
+
+void MainFrame::OnInputEnter(wxCommandEvent& evt)
+{
+	AddCodeFromInput();
+}
+
+void MainFrame::OnListKeyDown(wxKeyEvent& evt)
+{
+	switch (evt.GetKeyCode()) {
+		case WXK_DELETE:
+			DeleteSelectedTask();
+			break;
+		case WXK_UP:
+			MoveSelectedCode(-1);
+			break;
+		case WXK_DOWN:
+			MoveSelectedCode(1);
+			break;
+	}
+}
+
+void MainFrame::OnClearButtonClicked(wxCommandEvent& evt)
+{
+	if (outputBox->IsEmpty()) {
+		return;
+	}
+
+	wxMessageDialog dialog(this, "Do you want to clear all code?", 
+		"Clear", wxYES_NO | wxCANCEL);
+
+	int result = dialog.ShowModal();
+
+	if (result == wxID_YES) {
+		outputBox->Clear();
+	}
+}
+
+void MainFrame::OnWindowClosed(wxCloseEvent& evt)
+{
+	std::vector<Code> codes;
+
+	for (int i = 0; i < outputBox->GetCount(); i++) {
+		Code code;
+		code.description = outputBox->GetString(i);
+		code.done = outputBox->IsChecked(i);
+		codes.push_back(code);
+	}
+
+	saveCodeToFile(codes, "codes.txt", ); //add extra file here
+	evt.Skip();
+}
+
+void MainFrame::DeleteSelectedTask()
+{
+	int selectedIndex = outputBox->GetSelection();
+
+	if (selectedIndex == wxNOT_FOUND) {
+		return;
+	}
+
+	outputBox->Delete(selectedIndex);
 }
 
 void MainFrame::AddCodeFromInput()
 {
 	wxString code = inputTextField->GetValue();
-	wxString line = inputLineField->GetValue();
-	int lineNumber = wxAtoi(line);
 
 	if (!code.IsEmpty()) {
-
-		//how to get position of insertion, so that write text can write there!
-		outputBox->WriteText(code);
-		outputBox->WriteText('\n');
+		outputBox->Insert(code, outputBox->GetCount());
 		inputTextField->Clear();
-		inputLineField->Clear();
 	}
 
 	inputTextField->SetFocus();
+}
+
+void MainFrame::MoveSelectedCode(int offset)
+{
+	int selectedIndex = outputBox->GetSelection();
+	if (selectedIndex == wxNOT_FOUND) {
+		return;
+	}
+
+	int newIndex = selectedIndex + offset;
+
+	if (newIndex >= 0 && newIndex < outputBox->GetCount()) {
+		SwapCode(selectedIndex, newIndex);
+		outputBox->SetSelection(newIndex, true);
+	}
+}
+
+void MainFrame::SwapCode(int i, int j)
+{
+	Code codeI{ outputBox->GetString(i).ToStdString(), outputBox->IsChecked(i) };
+	Code codeJ{ outputBox->GetString(j).ToStdString(), outputBox->IsChecked(j) };
+
+	outputBox->SetString(i, codeJ.description);
+	outputBox->Check(i, codeJ.done);
+
+	outputBox->SetString(j, codeI.description);
+	outputBox->Check(j, codeI.done);
 }
