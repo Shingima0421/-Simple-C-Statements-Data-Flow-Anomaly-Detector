@@ -14,10 +14,10 @@ private:
 	void OnInputEnter(wxCommandEvent& evt);
 	void OnListKeyDown(wxKeyEvent& evt);
 	void OnClearButtonClicked(wxCommandEvent& evt);
-	void OnWindowClosed(wxCloseEvent& evt);
 
 	void DeleteSelectedTask();
 	void AddCodeFromInput();
+	void AddCodeToFile();
 	void MoveSelectedCode(int offset);
 	void SwapCode(int i, int j);
 

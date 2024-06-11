@@ -9,6 +9,9 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
 	CreateControls();
 	BindEventHandlers();
 	AddSavedTasks();
+	wxMessageDialog dialog1(this, "Things to note when using the application:\n1. Please do not interact with the checkboxes\n2. Don't forget to press Save\n3. Have Fun!",
+		"Simple C Anomaly Detector", wxOK);
+	dialog1.ShowModal();
 }
 
 void MainFrame::CreateControls()
@@ -18,7 +21,7 @@ void MainFrame::CreateControls()
 	inputTextHeader = new wxStaticText(panel, wxID_ANY, "Simple C Statement", wxPoint(17, 10));
 	inputTextField = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(17, 30), wxSize(280, 20), wxTE_PROCESS_ENTER);
 	clearButton = new wxButton(panel, wxID_ANY, "Clear", wxPoint(17, 675), wxSize(86, 22));
-	modifyButton = new wxButton(panel, wxID_ANY, "Modify", wxPoint(306, 29), wxSize(86, 22));
+	modifyButton = new wxButton(panel, wxID_ANY, "Save", wxPoint(306, 29), wxSize(86, 22)); //changing modifyButton to saving function
 
 	outputAnomaly = new wxTextCtrl(panel, wxID_ANY, "No Anomalies detected.", wxPoint(17, 570), wxSize(375, 100));
 	outputBox = new wxCheckListBox(panel, wxID_ANY, wxPoint(17, 60), wxSize(375, 500));
@@ -30,7 +33,6 @@ void MainFrame::BindEventHandlers()
 	inputTextField->Bind(wxEVT_TEXT_ENTER, &MainFrame::OnInputEnter, this);
 	outputBox->Bind(wxEVT_KEY_DOWN, &MainFrame::OnListKeyDown, this);
 	clearButton->Bind(wxEVT_BUTTON, &MainFrame::OnClearButtonClicked, this);
-	this->Bind(wxEVT_CLOSE_WINDOW, &MainFrame::OnWindowClosed, this);
 }
 
 void MainFrame::AddSavedTasks()
@@ -47,15 +49,15 @@ void MainFrame::AddSavedTasks()
 	}
 }
 
-void MainFrame::OnModifyButtonClicked(wxCommandEvent& evt) //change modify button to save button so that when pressed, 
-														   //it saves all the code to the file
-{
-	AddCodeFromInput();
+void MainFrame::OnModifyButtonClicked(wxCommandEvent& evt) //change modify button to save button so that when pressed, 												  
+{														   //it will save all the code to the text file, rather than only when it closes
+	AddCodeToFile();
 }
 
 void MainFrame::OnInputEnter(wxCommandEvent& evt)
 {
 	AddCodeFromInput();
+	AddCodeToFile(); //so when user presses "enter" it also saves and adds the parsed function
 }
 
 void MainFrame::OnListKeyDown(wxKeyEvent& evt)
@@ -89,21 +91,6 @@ void MainFrame::OnClearButtonClicked(wxCommandEvent& evt)
 	}
 }
 
-void MainFrame::OnWindowClosed(wxCloseEvent& evt)
-{
-	std::vector<Code> codes;
-
-	for (int i = 0; i < outputBox->GetCount(); i++) {
-		Code code;
-		code.description = outputBox->GetString(i);
-		code.done = outputBox->IsChecked(i);
-		codes.push_back(code);
-	}
-
-	saveCodeToFile(codes, "codes.txt", ); //add extra file here
-	evt.Skip();
-}
-
 void MainFrame::DeleteSelectedTask()
 {
 	int selectedIndex = outputBox->GetSelection();
@@ -125,6 +112,20 @@ void MainFrame::AddCodeFromInput()
 	}
 
 	inputTextField->SetFocus();
+}
+
+void MainFrame::AddCodeToFile()
+{
+	std::vector<Code> codes;
+
+	for (int i = 0; i < outputBox->GetCount(); i++) {
+		Code code;
+		code.description = outputBox->GetString(i);
+		code.done = outputBox->IsChecked(i);
+		codes.push_back(code);
+	}
+
+	saveCodeToFile(codes, "codes.txt", "test.txt"); //add extra file here
 }
 
 void MainFrame::MoveSelectedCode(int offset)
