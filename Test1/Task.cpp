@@ -118,7 +118,6 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
 
         std::vector<outputlist> outputlist_vect;
 
-
         if (yaithave == 0 && isanif == 0)
         {
             int sequenceCount = 0;

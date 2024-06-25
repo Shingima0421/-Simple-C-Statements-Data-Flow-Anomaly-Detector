@@ -50,7 +50,7 @@ void MainFrame::BindEventHandlers()
 }*/
 
 void MainFrame::OnModifyButtonClicked(wxCommandEvent& evt) //update modify button to call Koko's function											  
-{														   
+{	
 	std::string errorMessage = loadCodeFromFile("error.txt");
 	std::string output;
 	outputAnomaly->Clear();
