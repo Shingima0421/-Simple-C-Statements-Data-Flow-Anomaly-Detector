@@ -1,0 +1,24 @@
+(INSERT, a, KILL, 0, 0)
+(INSERT, a, WRITE, 0, 1)
+
+(INSERT, a, READ, 0, 2)
+(INSERT, b, KILL, 0, 3)
+(INSERT, b, WRITE, 0, 4)
+
+(INSERT, b, KILL, 0, 5)
+(INSERT, b, WRITE, 0, 6)
+
+(INSERT, a, KILL, 0, 7)
+(INSERT, a, WRITE, 0, 8)
+
+(INSERT, a, READ, 1, 0)
+
+(INSERT, b, KILL, 2, 0)
+(INSERT, b, WRITE, 2, 1)
+
+(INSERT, a, READ, 3, 0)
+
+(INSERT, a, READ, 4, 0)
+(INSERT, d, KILL, 4, 1)
+(INSERT, d, WRITE, 4, 2)
+

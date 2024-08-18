@@ -18,10 +18,11 @@ struct outputlist
 	int sequenceOrder; // 5. order of Sequence
 };
 
-void saveCodeToFile(const std::string& code, const std::string& fileName, const std::string& fileName2)
+void saveCodeToFile(const std::string& code, const std::string& fileName, const std::string& fileName2, const std::string& fileName3)
 {
 	std::ofstream ostream(fileName); //code
 	std::ofstream ostream2(fileName2); //parsed 
+    std::ofstream ostream3(fileName3); //line numbers
 
     ostream << code;
 
@@ -29,7 +30,8 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
     std::string segment;
     std::vector<std::string> seglist;
     int node_count = 0;
-    int line_num = 0;
+    int seq_num = 0; //sequence number
+    int line_num = 1; //line number
     while (std::getline(test, segment))
     {
         std::string s = segment;
@@ -42,10 +44,14 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
 
         if (s == "{" || s == "}") {
             node_count++;
-            if (s == "}")
+            if (s == "}") {
+                seq_num++;
                 line_num++;
-            if (s == "{")
-                line_num = 0;
+            }
+            if (s == "{") {
+                seq_num = 0;
+                line_num++;
+            }
             continue;
         }
 
@@ -106,14 +112,11 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
             pos = 0;
             while ((pos = var_right.find(sign)) != std::string::npos) {
                 var_right1 = var_right.substr(0, pos);
-                //std::cout << "var_right1 = " << var_right1 << std::endl;
                 var_right.erase(0, pos + sign.length());
                 var_right2 = var_right;
             }
-            //std::cout << "var_right2 = " << var_right2 << std::endl;
         }
         else {
-            //std::cout << "var_right = " << var_right << std::endl;
         }
 
         std::vector<outputlist> outputlist_vect;
@@ -139,8 +142,8 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
                 outputlist1.varname = var_right;
                 outputlist1.readorwrite = "READ";
                 outputlist1.node_id = node_count; // don't forget node_id
-                outputlist1.sequenceOrder = line_num;
-                line_num++;
+                outputlist1.sequenceOrder = seq_num;
+                seq_num++;
                 outputlist_vect.push_back(outputlist1);
             }
 
@@ -150,8 +153,8 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
             outputlist2.varname = var_left;
             outputlist2.readorwrite = "KILL";
             outputlist2.node_id = node_count; // don't forget node_id
-            outputlist2.sequenceOrder = line_num;
-            line_num++;
+            outputlist2.sequenceOrder = seq_num;
+            seq_num++;
             outputlist_vect.push_back(outputlist2);
 
             outputlist outputlist3;
@@ -159,8 +162,8 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
             outputlist3.varname = var_left;
             outputlist3.readorwrite = "WRITE";
             outputlist3.node_id = node_count; // don't forget node_id
-            outputlist3.sequenceOrder = line_num;
-            line_num++;
+            outputlist3.sequenceOrder = seq_num;
+            seq_num++;
             outputlist_vect.push_back(outputlist3);
         }
         else if (yaithave == 1 && isanif == 0)
@@ -184,8 +187,8 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
                 outputlist1.varname = var_right1;
                 outputlist1.readorwrite = "READ";
                 outputlist1.node_id = node_count; // don't forget node_id
-                outputlist1.sequenceOrder = line_num;
-                line_num++;
+                outputlist1.sequenceOrder = seq_num;
+                seq_num++;
                 outputlist_vect.push_back(outputlist1);
             }
 
@@ -206,8 +209,8 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
                 outputlist2.varname = var_right2;
                 outputlist2.readorwrite = "READ";
                 outputlist2.node_id = node_count; // don't forget node_id
-                outputlist2.sequenceOrder = line_num;
-                line_num++;
+                outputlist2.sequenceOrder = seq_num;
+                seq_num++;
                 outputlist_vect.push_back(outputlist2);
             }
 
@@ -217,8 +220,8 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
             outputlist3.varname = var_left;
             outputlist3.readorwrite = "KILL";
             outputlist3.node_id = node_count; // don't forget node_id
-            outputlist3.sequenceOrder = line_num;
-            line_num++;
+            outputlist3.sequenceOrder = seq_num;
+            seq_num++;
             outputlist_vect.push_back(outputlist3);
 
             outputlist outputlist4;
@@ -226,12 +229,12 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
             outputlist4.varname = var_left;
             outputlist4.readorwrite = "WRITE";
             outputlist4.node_id = node_count; // don't forget node_id
-            outputlist4.sequenceOrder = line_num;
-            line_num++;
+            outputlist4.sequenceOrder = seq_num;
+            seq_num++;
             outputlist_vect.push_back(outputlist4);
         }
         else if (isanif == 1 && yaithave == 0) {
-            line_num = 0;
+            seq_num = 0;
             bool notdigit = false;
             for (int i = 0; i < var_right.size(); i++)
             {
@@ -248,8 +251,8 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
                 outputlist1.varname = var_right;
                 outputlist1.readorwrite = "READ";
                 outputlist1.node_id = node_count; // don't forget node_id
-                outputlist1.sequenceOrder = line_num;
-                line_num++;
+                outputlist1.sequenceOrder = seq_num;
+                seq_num++;
                 outputlist_vect.push_back(outputlist1);
             }
 
@@ -259,29 +262,119 @@ void saveCodeToFile(const std::string& code, const std::string& fileName, const 
             outputlist2.varname = var_left;
             outputlist2.readorwrite = "READ";
             outputlist2.node_id = node_count; // don't forget node_id
-            outputlist2.sequenceOrder = line_num;
-            line_num++;
+            outputlist2.sequenceOrder = seq_num;
+            seq_num++;
             outputlist_vect.push_back(outputlist2);
         }
 
         for (int j = 0; j < outputlist_vect.size(); j++)
         {
-            if (j != 0) ostream2 << "\n";
+            if (j != 0) {
+                ostream2 << '\n';
+                ostream3 << '\n';
+            }
             ostream2 << "(" << outputlist_vect[j].activity << ", "
                 << outputlist_vect[j].varname << ", "
                 << outputlist_vect[j].readorwrite << ", "
                 << outputlist_vect[j].node_id << ", " // don't forget to modify node_id
                 << outputlist_vect[j].sequenceOrder << ")";
+            ostream3 << outputlist_vect[j].node_id << "," << outputlist_vect[j].sequenceOrder << "," << line_num;
         }
         ostream2 << '\n' << '\n';
+        ostream3 << '\n';
+        line_num++;
+        
     }
 }
 
-std::string loadCodeFromFile(const std::string& fileName)
+std::string loadCodeFromFile(const std::string& fileName1, const std::string& fileName2)
 {
-	std::ifstream istream(fileName);
-	std::string description;
-	istream >> description;
+    std::string final_ans;
+    std::vector<std::string> error_name;
+    std::vector<std::string> var_name;
+    std::vector<std::tuple<int, int>> first_err;
+    std::vector<std::tuple<int, int>> second_err;
 
-	return description;
+    // Open the text file for error details
+    std::ifstream file(fileName1);
+
+    std::string line;
+    while (std::getline(file, line)) {
+        // Remove the first and last brackets
+        line = line.substr(1, line.size() - 2);
+
+        std::stringstream ss(line);
+        std::string item;
+        int count = 0;
+
+        while (std::getline(ss, item, ',')) {
+            if (count == 0) {
+                error_name.push_back(item);
+            }
+            else if (count == 1) {
+                var_name.push_back(item);
+            }
+            else if (count == 2 || count == 3) {
+                size_t colon_pos = item.find(':');
+                int first_num = std::stoi(item.substr(0, colon_pos));
+                int second_num = std::stoi(item.substr(colon_pos + 1));
+
+                if (count == 2)
+                    first_err.emplace_back(first_num, second_num);
+                else
+                    second_err.emplace_back(first_num, second_num);
+            }
+            count++;
+        }
+    }
+
+    file.close();
+
+    std::vector<std::string> node_id;
+    std::vector<std::string> seq_id;
+    std::vector<std::string> line_num;
+
+    // Open the text file for line numbers
+    std::ifstream file2(fileName2);
+
+    std::string line2;
+    while (std::getline(file2, line2)) {
+        std::stringstream ss(line2);
+        std::string item;
+        int count = 0;
+
+        while (std::getline(ss, item, ',')) {
+            if (count == 0)
+                node_id.push_back(item);
+            else if (count == 1)
+                seq_id.push_back(item);
+            else if (count == 2)
+                line_num.push_back(item);
+
+            count++;
+        }
+    }
+
+    file2.close();
+
+    std::string final_linenum1, final_linenum2;
+    for (size_t i = 0; i < first_err.size(); ++i) {
+        for (size_t j = 0; j < node_id.size(); ++j) {
+            if (std::get<0>(first_err[i]) == std::stoi(node_id[j]) && std::get<1>(first_err[i]) == std::stoi(seq_id[j])) {
+                final_linenum1 = line_num[j];
+            }
+            if (std::get<0>(second_err[i]) == std::stoi(node_id[j]) && std::get<1>(second_err[i]) == std::stoi(seq_id[j])) {
+                final_linenum2 = line_num[j];
+            }
+        }
+
+        final_ans = "Data Flow Anomaly Detected:\n"
+            "Anomaly Type: " + error_name[i] + "\n"
+            "Which Variable: " + var_name[i] + "\n"
+            "From Line " + final_linenum1 + " to Line " + final_linenum2 + "\n" + "-----------------------------------";
+        std::cout << final_ans << std::endl;
+    }
+
+    return final_ans;
+
 }

@@ -1,7 +1,9 @@
 #include "MainFrame.h"
 #include <wx/wx.h>
 #include <vector>
+#include <filesystem>
 #include <string>
+#include <sstream>
 #include "Task.h"
 
 MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
@@ -24,7 +26,7 @@ void MainFrame::CreateControls()
 	modifyButton = new wxButton(panel, wxID_ANY, "Check", wxPoint(110, 29), wxSize(86, 22)); //changing modifyButton to saving function
 	saveButton = new wxButton(panel, wxID_ANY, "Save", wxPoint(17, 29), wxSize(86, 22)); //changing modifyButton to saving function
 
-	outputAnomaly = new wxTextCtrl(panel, wxID_ANY, "No Anomalies detected.", wxPoint(17, 569), wxSize(375, 100), wxTE_READONLY);
+	outputAnomaly = new wxTextCtrl(panel, wxID_ANY, "No Anomalies detected.", wxPoint(17, 569), wxSize(375, 100), wxTE_READONLY | wxTE_MULTILINE);
 	outputBox = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(17, 60), wxSize(375, 500), wxTE_MULTILINE);
 }
 
@@ -51,10 +53,9 @@ void MainFrame::BindEventHandlers()
 
 void MainFrame::OnModifyButtonClicked(wxCommandEvent& evt) //update modify button to call Koko's function											  
 {	
-	std::string errorMessage = loadCodeFromFile("error.txt");
-	std::string output;
+	std::string errorMessage = loadCodeFromFile("error.txt", "lineNumbers.txt");
 	outputAnomaly->Clear();
-	outputAnomaly->WriteText("Write to Write Error: It is with the variable b [line 4 to 6]");
+	outputAnomaly->WriteText(errorMessage);
 }
 
 /*void MainFrame::OnInputEnter(wxCommandEvent& evt)
@@ -133,7 +134,7 @@ void MainFrame::AddCodeToFile()
 	wxString codes = outputBox->GetValue();
 	std::string code = std::string(codes.mb_str());
 
-	saveCodeToFile(code, "codes.txt", "test.txt"); //add extra file here
+	saveCodeToFile(code, "codes.txt", "test.txt", "lineNumbers.txt");
 }
 
 /*void MainFrame::MoveSelectedCode(int offset)

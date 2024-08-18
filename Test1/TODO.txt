@@ -1,0 +1,5 @@
+1. Need to check only the modified parts, per line, and not the whole thing.
+
+2. (DONE) Output error needs to be written properly. Make an unordered map, and assign each node process to a line number, and get the output properly.
+
+3. (CANT) Line number. Don't know how to do that properly yet.
